@@ -68,7 +68,6 @@ function initSelectionEventHandler() {
         floatBtn.onclick = () => {
             const virtualEl = {
                 getBoundingClientRect: () => {
-                    console.log('virtual rect', rect)
                     return rect
                 }
             }
@@ -119,12 +118,11 @@ class DictManager  {
               },
             ],
         })
-        console.log('instance===', this.instance)
         const destroyer = () => {
             this.instance.destroy()
-            document.removeEventListener('click', destroyer)
+            document.body.removeEventListener('click', destroyer)
         }
-        document.addEventListener('click', destroyer)
+        document.body.addEventListener('click', destroyer)
     }
     private getDictElemInTooltip(dictId: dict_t): Element | undefined {
         const rootEl = document.getElementById(TOOLTIP_ID)
