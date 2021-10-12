@@ -54,7 +54,7 @@ function initSelectionEventHandler() {
             return
         }
         let text = selection.toString()
-        console.log('selection changed!', text)
+        // console.log('selection changed!', text)
         if (!text) {
             // because selectionchange will be triggered before button clicked
             window.setTimeout(() => {
@@ -62,8 +62,9 @@ function initSelectionEventHandler() {
             }, 100)
             return
         }
-        let rect = selection.getRangeAt(selection.rangeCount - 1).getBoundingClientRect()
-        floatBtn.style.top = `calc(${rect.top}px + 48px)`
+        let range = selection.getRangeAt(selection.rangeCount - 1)
+        let rect = range.getBoundingClientRect()
+        floatBtn.style.top = `calc(${window.scrollY + rect.top}px + 48px)`
         floatBtn.style.left = `calc(${rect.left}px + calc(${rect.width}px / 2) - 40px)`
         floatBtn.onclick = () => {
             const virtualEl = {
