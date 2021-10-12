@@ -1,2 +1,42 @@
+* Development
+** Prepare
+
+#+begin_src bash
+npm i
+#+end_src
+
+** Run for development (Watch)
+
+#+begin_src bash
+make dev
+web-ext run --verbose --firefox-profile ~/.mozilla/firefox/PROFILE_DIR_NAME
+#+end_src
+
+#+begin_quote
+
+
+If webpack watch exit immediately without any error, please try [[https://github.com/guard/listen/wiki/Increasing-the-amount-of-inotify-watchers][https://github.com/guard/listen/wiki/Increasing-the-amount-of-inotify-watchers]]
+
+
+#+end_quote
+
+** Run Firefox for developing WebExtension
+
+#+begin_src bash
+web-ext run --verbose --firefox-profile ~/.mozilla/firefox/XXXXXXX.NAME
+#+end_src
+
+** Deploy (Build .xpi file & run a HTTP server for download)
+
+#+begin_src bash
+make xpi-server
+#+end_src
+
+** Zip this repository for uploading to addons.mozilla.org
+
+#+begin_src bash
+make zip-repo
+#+end_src
+
 * License
 MPL 2.0
