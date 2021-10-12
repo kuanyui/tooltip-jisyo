@@ -7,20 +7,28 @@
     font-size: 13px;
     border-radius: 4px;
 }
+#tooltipJisyo_tooltip .scrollArea {
+    display: block;
+    overflow-y: scroll;
+    width: 400px;
+    height: 400px;
+    max-width: 90vw;
+    max-height: 50vw;
+}
 
-#tooltipJisyo_tooltip.arrow,
-#tooltipJisyo_tooltip.arrow::before {
+#tooltipJisyo_tooltip .arrow,
+#tooltipJisyo_tooltip .arrow::before {
     position: absolute;
     width: 8px;
     height: 8px;
     background: inherit;
 }
 
-#tooltipJisyo_tooltip.arrow {
+#tooltipJisyo_tooltip .arrow {
     visibility: hidden;
 }
 
-#tooltipJisyo_tooltip.arrow::before {
+#tooltipJisyo_tooltip .arrow::before {
     visibility: visible;
     content: '';
     transform: rotate(45deg);

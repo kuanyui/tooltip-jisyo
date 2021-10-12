@@ -29,7 +29,7 @@
             "css": ["dist/content.css"]
         }
     ],
-    "permissions": [ "tabs", "storage", "https://*.weblio.jp/*" ],
+    "permissions": [ "tabs", "storage", "https://*.weblio.jp/*", "https://*.goo.ne.jp/*" ],
     "web_accessible_resources": ["img/engines/*.svg"],
     "commands": {
         "_execute_page_action": {

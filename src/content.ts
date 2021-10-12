@@ -67,7 +67,10 @@ function initSelectionEventHandler() {
         floatBtn.style.left = `calc(${rect.left}px + calc(${rect.width}px / 2) - 40px)`
         floatBtn.onclick = () => {
             const virtualEl = {
-                getBoundingClientRect() { return rect }
+                getBoundingClientRect: () => {
+                    console.log('virtual rect', rect)
+                    return rect
+                }
             }
             dictMan.openTooltipForQuery(virtualEl, text)
         }
@@ -91,13 +94,16 @@ class DictManager  {
         const arrowEl = document.createElement('div')
         arrowEl.className = 'arrow'
         arrowEl.dataset['popperArrow'] = 'true'
+        const scrollArea = document.createElement('div')
+        scrollArea.className = 'scrollArea'
         const gooEl = document.createElement('div')
         gooEl.className = 'dict_goo'
         const weblioEl = document.createElement('div')
         weblioEl.className = 'dict_weblio'
-        popperEl.append(gooEl)
-        popperEl.append(weblioEl)
+        popperEl.append(scrollArea)
         popperEl.append(arrowEl)
+        scrollArea.append(gooEl)
+        scrollArea.append(weblioEl)
         popperEl.addEventListener('click', (ev) => {
             ev.stopPropagation()
         })
@@ -138,8 +144,12 @@ class DictManager  {
                 mountPoint.append(section.sectionElement)
                 mountPoint.append(document.createElement('hr'))
             }
-            this.instance.update()
-            this.instance.forceUpdate()
+            if (this.instance) {
+                console.log('popper.update()')
+                this.instance.forceUpdate()
+            } else {
+                console.warn('not found popper instance')
+            }
         })
         this.fetchGoo(queryWord).then(arr => {
             const mountPoint = this.getDictElemInTooltip('goo')
@@ -148,8 +158,12 @@ class DictManager  {
                 mountPoint.append(section.sectionElement)
                 mountPoint.append(document.createElement('hr'))
             }
-            this.instance.update()
-            this.instance.forceUpdate()
+            if (this.instance) {
+                console.log('popper.update()')
+                this.instance.forceUpdate()
+            } else {
+                console.warn('not found popper instance')
+            }
         })
     }
     private async fetchWeblio(queryWord: string): Promise<DefinitionSection[]> {
@@ -184,8 +198,10 @@ class DictManager  {
         if (!res.ok) { return [] }
         const html: string = res.d
         const dom = this.parseDom(html)
-        const titleEl = dom.querySelector('.basic_title')!
-        const meanEl = dom.querySelector('.meaning_area')!
+        const titleEl = dom.querySelector('.basic_title')
+        if (!titleEl) { return [] }
+        const meanEl = dom.querySelector('.meaning_area')
+        if (!meanEl) { return [] }
         const relatedWordsEl = dom.querySelector('.related_words_box')
         const mergedEl = document.createElement('div')
         mergedEl.append(meanEl)
