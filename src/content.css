@@ -1,0 +1,43 @@
+#tooltipJisyo_tooltip {
+    display: inline-block;
+    background: #ffffff;
+    color: #643045;
+    font-weight: bold;
+    padding: 5px 10px;
+    font-size: 13px;
+    border-radius: 4px;
+}
+
+#tooltipJisyo_tooltip.arrow,
+#tooltipJisyo_tooltip.arrow::before {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: inherit;
+}
+
+#tooltipJisyo_tooltip.arrow {
+    visibility: hidden;
+}
+
+#tooltipJisyo_tooltip.arrow::before {
+    visibility: visible;
+    content: '';
+    transform: rotate(45deg);
+}
+
+#tooltipJisyo_tooltip[data-popper-placement^='top'] > .arrow {
+    bottom: -4px;
+}
+
+#tooltipJisyo_tooltip[data-popper-placement^='bottom'] > .arrow {
+    top: -4px;
+}
+
+#tooltipJisyo_tooltip[data-popper-placement^='left'] > .arrow {
+    right: -4px;
+}
+
+#tooltipJisyo_tooltip[data-popper-placement^='right'] > .arrow {
+    left: -4px;
+}
