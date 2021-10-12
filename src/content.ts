@@ -80,7 +80,7 @@ function initSelectionEventHandler() {
 
 class DictManager  {
     domParser: DOMParser = new window.DOMParser()
-    instance!: Instance
+    instance: Instance | undefined
     private parseDom(html: string): Document {
         return this.domParser.parseFromString(html, 'text/html')
     }
@@ -118,19 +118,35 @@ class DictManager  {
               },
             ],
         })
-        const destroyer = () => {
-            this.instance.destroy()
-            document.body.removeEventListener('click', destroyer)
-        }
-        document.body.addEventListener('click', destroyer)
+        window.setTimeout(() => {
+            const destroyer = () => {
+                const el = document.getElementById(TOOLTIP_ID)
+                if (el) {
+                    el.remove()
+                }
+                if (this.instance) {
+                    this.instance.destroy()
+                }
+                document.body.removeEventListener('click', destroyer)
+            }
+            document.body.addEventListener('click', destroyer)
+        }, 500)
     }
-    private getDictElemInTooltip(dictId: dict_t): Element | undefined {
+    private clearResult() {
+        let el
+        el = this.getDictElemInTooltip('goo')
+        if (el) { el.innerText = '' }
+        el = this.getDictElemInTooltip('weblio')
+        if (el) { el.innerText = '' }
+    }
+    private getDictElemInTooltip(dictId: dict_t): HTMLElement | undefined {
         const rootEl = document.getElementById(TOOLTIP_ID)
         if (!rootEl) { return }
         const className = `dict_${dictId}`
-        return rootEl.getElementsByClassName(className).item(0) || undefined
+        return rootEl.getElementsByClassName(className).item(0)! as HTMLElement
     }
     public async openTooltipForQuery(posEl: Element | VirtualElement, queryWord: string) {
+        this.clearResult()
         this.createTooltipElement(posEl)
         this.fetchWeblio(queryWord).then(arr => {
             const mountPoint = this.getDictElemInTooltip('weblio')
