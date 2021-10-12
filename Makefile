@@ -1,6 +1,6 @@
 .PHONY: dev build xpi xpi-server clear zip-repo
 
-NAME=Engine Switcher
+NAME=Tooltip Jisyo
 BIN:="node_modules/.bin"
 XPI_DIR=../xpi
 

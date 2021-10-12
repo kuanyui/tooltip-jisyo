@@ -5,7 +5,7 @@ const config = {
     entry: {
         background: './src/background.ts',
         content: './src/content.ts',
-        options_ui: './options_ui/index.ts'
+        // options_ui: './options_ui/index.ts'
     },
     output: {
         filename: '[name].js',
@@ -30,7 +30,7 @@ const config = {
     plugins: [
       new VueLoaderPlugin(),
       new CopyPlugin([
-        { from: 'options_ui/index.html', to: 'options_ui.html', force: true, toType: 'file' },
+        // { from: 'options_ui/index.html', to: 'options_ui.html', force: true, toType: 'file' },
         { from: 'src/content.css', to: 'content.css', force: true, toType: 'file' },
         // { from: 'manifest.json', to: 'manifest.json', force: true, toType: 'file' },
       ]),
