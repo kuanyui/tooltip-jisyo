@@ -1,4 +1,4 @@
-import { TypedMsg, storageManager, safeFetchHtml, dict_t } from "./common"
+import { TypedMsg, storageManager, safeFetchHtml, dict_t, createDebounceFunction } from "./common"
 import { arrow, createPopper, Instance, popper, VirtualElement } from '@popperjs/core'
 // import tippy from 'tippy.js';
 const BTN_ID = 'tooltipJisyo_btn'
@@ -46,35 +46,42 @@ function getFloatBtn(): HTMLElement {
 }
 
 function initSelectionEventHandler() {
-    document.addEventListener('selectionchange', () => {
+    // selectionchange is often triggered before button clicked, so add a timeout
+    const selectionEvtHandler = () => {
         const floatBtn = getFloatBtn()
         const selection = document.getSelection()
         if (!selection) {
             floatBtn.remove()
+            console.log('[DEBUG] no selection, remove button')
             return
         }
         let text = selection.toString()
         // console.log('selection changed!', text)
         if (!text) {
-            // because selectionchange will be triggered before button clicked
-            window.setTimeout(() => {
-                floatBtn.remove()
-            }, 100)
+            console.log('[DEBUG] no text, remove button')
+            floatBtn.remove()
             return
         }
+        console.log('text changed ==>', text)
         let range = selection.getRangeAt(selection.rangeCount - 1)
         let rect = range.getBoundingClientRect()
         floatBtn.style.top = `calc(${window.scrollY + rect.top}px + 48px)`
         floatBtn.style.left = `calc(${rect.left}px + calc(${rect.width}px / 2) - 40px)`
-        floatBtn.onclick = () => {
+        floatBtn.onclick = (ev) => {
+            ev.stopPropagation()
             const virtualEl = {
                 getBoundingClientRect: () => {
                     return rect
                 }
             }
+            console.log('[SUCCESS] float btn clicked')
             dictMan.openTooltipForQuery(virtualEl, text)
         }
-        document.body.appendChild(floatBtn)
+            document.body.appendChild(floatBtn)
+    }
+    const debouncedSelectionEvtHandler = createDebounceFunction(selectionEvtHandler, 300)
+    document.addEventListener('selectionchange', () => {
+        debouncedSelectionEvtHandler()
     })
 }
 
@@ -160,7 +167,6 @@ class DictManager  {
                 mountPoint.append(document.createElement('hr'))
             }
             if (this.instance) {
-                console.log('popper.update()')
                 this.instance.forceUpdate()
             } else {
                 console.warn('not found popper instance')
@@ -174,7 +180,6 @@ class DictManager  {
                 mountPoint.append(document.createElement('hr'))
             }
             if (this.instance) {
-                console.log('popper.update()')
                 this.instance.forceUpdate()
             } else {
                 console.warn('not found popper instance')

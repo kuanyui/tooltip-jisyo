@@ -128,3 +128,14 @@ export function safeFetchHtml(url: string, opts?: RequestInit): Promise<SafeResp
         }
     })
 }
+
+export function createDebounceFunction <F extends () => any> (callback: F, duration: number): () => any {
+    let timeoutId: number
+    return () => {
+        clearTimeout(timeoutId)
+        timeoutId = window.setTimeout(() => {
+            callback()
+            timeoutId = -1
+        }, duration)
+    }
+}
