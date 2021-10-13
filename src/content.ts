@@ -89,8 +89,24 @@ function initSelectionEventHandler() {
 class DictManager  {
     domParser: DOMParser = new window.DOMParser()
     instance: Instance | undefined
-    private parseDom(html: string): Document {
-        return this.domParser.parseFromString(html, 'text/html')
+    private parseDom(docUrl: string, html: string): Document {
+        const u = new URL(docUrl)
+        const domain = u.origin
+        const doc = this.domParser.parseFromString(html, 'text/html')
+        var base = doc.createElement('base')
+        base.href = domain
+        doc.head.appendChild(base)
+        console.log('DOM.URL', doc.URL)
+        doc.querySelectorAll('a').forEach(a => {
+            a.setAttribute('target', '_blank')  // Force open with new tab
+            const rawHref = a.getAttribute('href')
+            console.log('RAW HREF ===', rawHref)
+            if (!rawHref) { return }
+            if (rawHref.startsWith('/') && !rawHref.startsWith('//')) {
+                a.href = domain + rawHref
+            }
+        })
+        return doc
     }
     private createTooltipElement(posEl: Element | VirtualElement) {
         const existedEl = document.getElementById(TOOLTIP_ID)
@@ -153,6 +169,15 @@ class DictManager  {
         const className = `dict_${dictId}`
         return rootEl.getElementsByClassName(className).item(0)! as HTMLElement
     }
+    private genBookRef(section: DefinitionSection): HTMLElement {
+        const h = document.createElement('h5')
+        h.innerText = section.source.bookName
+        const a = document.createElement('a')
+        a.innerText = '[参照]'
+        a.href = section.source.wordLink
+        h.append(a)
+        return h
+    }
     public async openTooltipForQuery(posEl: Element | VirtualElement, queryWord: string) {
         this.clearResult()
         this.createTooltipElement(posEl)
@@ -160,9 +185,7 @@ class DictManager  {
             const mountPoint = this.getDictElemInTooltip('weblio')
             if (!mountPoint) { return }
             for (const section of arr) {
-                const header = document.createElement('h6')
-                header.innerText = section.source.bookName
-                mountPoint.append(header)
+                mountPoint.append(this.genBookRef(section))
                 mountPoint.append(section.sectionElement)
                 mountPoint.append(document.createElement('hr'))
             }
@@ -176,6 +199,7 @@ class DictManager  {
             const mountPoint = this.getDictElemInTooltip('goo')
             if (!mountPoint) { return }
             for (const section of arr) {
+                mountPoint.append(this.genBookRef(section))
                 mountPoint.append(section.sectionElement)
                 mountPoint.append(document.createElement('hr'))
             }
@@ -192,7 +216,7 @@ class DictManager  {
         const res = await safeFetchHtml(wordUrl)
         if (!res.ok) { return [] }
         const html: string = res.d
-        const dom = this.parseDom(html)
+        const dom = this.parseDom(wordUrl, html)
         const nodes = dom.querySelectorAll('.kijiWrp')
         console.log('fetched nodes', nodes)
         const sectionList: DefinitionSection[] = []
@@ -217,13 +241,17 @@ class DictManager  {
         const res = await safeFetchHtml(wordUrl)
         if (!res.ok) { return [] }
         const html: string = res.d
-        const dom = this.parseDom(html)
-        const titleEl = dom.querySelector('.basic_title')
+        const dom = this.parseDom(wordUrl, html)
+        const titleEl = dom.querySelector('.basic_title h1') as HTMLElement
         if (!titleEl) { return [] }
+        titleEl.querySelectorAll('.meaning').forEach(el => el.remove())
         const meanEl = dom.querySelector('.meaning_area')
         if (!meanEl) { return [] }
         const relatedWordsEl = dom.querySelector('.related_words_box')
         const mergedEl = document.createElement('div')
+        const h2 = document.createElement('h2')
+        h2.innerText = titleEl.innerText.replaceAll('\n', '')
+        mergedEl.append(h2)
         mergedEl.append(meanEl)
         if (relatedWordsEl) {
             mergedEl.append(relatedWordsEl)
@@ -232,8 +260,8 @@ class DictManager  {
         sectionList.push({
             source: {
                 wordLink: wordUrl,
-                bookName: titleEl.textContent || 'Unknown Dictionary',
-                bookLink: ''
+                bookName: 'goo 辞書',
+                bookLink: wordUrl
             },
             sectionElement: mergedEl
         })

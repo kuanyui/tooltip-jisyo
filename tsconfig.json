@@ -19,7 +19,8 @@
     "target": "esnext",
     "lib": [
       "esnext",
-      "dom"
+      "dom",
+      "dom.Iterable"
     ],
     "strict": true,
     "removeComments": true,
