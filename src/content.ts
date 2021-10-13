@@ -96,11 +96,11 @@ class DictManager  {
         var base = doc.createElement('base')
         base.href = domain
         doc.head.appendChild(base)
-        console.log('DOM.URL', doc.URL)
+        // console.log('DOM.URL', doc.URL)
         doc.querySelectorAll('a').forEach(a => {
             a.setAttribute('target', '_blank')  // Force open with new tab
             const rawHref = a.getAttribute('href')
-            console.log('RAW HREF ===', rawHref)
+            // console.log('RAW HREF ===', rawHref)
             if (!rawHref) { return }
             if (rawHref.startsWith('/') && !rawHref.startsWith('//')) {
                 a.href = domain + rawHref

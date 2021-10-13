@@ -93,8 +93,15 @@ type SafeResponse<T> = SafeResponseSuccess<T> | SafeResponseFailed
 export function safeFetchHtml(url: string, opts?: RequestInit): Promise<SafeResponse<string>> {
     const abortCtrl = new AbortController()
     if (!opts) {
-        opts = { mode: "cors", method: "get" }
+        opts = {
+            mode: "cors",
+            method: "get"
+        }
     }
+    const headers = new Headers({
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0'
+    })
+    opts.headers = headers
     opts.signal = abortCtrl.signal
     const raceResult = Promise.race([
         fetch(url, opts).then(r => {
