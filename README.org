@@ -38,5 +38,8 @@ make xpi-server
 make zip-repo
 #+end_src
 
+* Acknowedgement
+The icon is from [[https://gitlab.gnome.org/GNOME/adwaita-icon-theme][GNOME Project's Adwaita Theme]], which is released under LGPLv3.
+
 * License
 MPL 2.0
