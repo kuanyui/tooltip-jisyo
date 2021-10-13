@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Tooltip Jisyo",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "applications": {
         "gecko": {
             "id": "{cdd0ea72-a751-40d0-b610-926662a8b39b}"
