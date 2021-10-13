@@ -11,6 +11,7 @@ interface DefinitionSection {
         bookName: string,
         bookLink: string
     }
+    /** Should not include book name */
     sectionElement: Element
 }
 
@@ -106,6 +107,9 @@ class DictManager  {
                 a.href = domain + rawHref
             }
         })
+        if (docUrl.includes('weblio')) {
+            console.log('document.body =', doc.body)
+        }
         return doc
     }
     private createTooltipElement(posEl: Element | VirtualElement) {
@@ -169,12 +173,13 @@ class DictManager  {
         const className = `dict_${dictId}`
         return rootEl.getElementsByClassName(className).item(0)! as HTMLElement
     }
-    private genBookRef(section: DefinitionSection): HTMLElement {
+    private genWordRef(section: DefinitionSection): HTMLElement {
         const h = document.createElement('h5')
         h.innerText = section.source.bookName
         const a = document.createElement('a')
         a.innerText = '[参照]'
         a.href = section.source.wordLink
+        a.style.float = 'right'
         h.append(a)
         return h
     }
@@ -182,10 +187,11 @@ class DictManager  {
         this.clearResult()
         this.createTooltipElement(posEl)
         this.fetchWeblio(queryWord).then(arr => {
+            console.log('[result][weblio] sections ===', arr)
             const mountPoint = this.getDictElemInTooltip('weblio')
             if (!mountPoint) { return }
             for (const section of arr) {
-                mountPoint.append(this.genBookRef(section))
+                mountPoint.append(this.genWordRef(section))
                 mountPoint.append(section.sectionElement)
                 mountPoint.append(document.createElement('hr'))
             }
@@ -196,10 +202,11 @@ class DictManager  {
             }
         })
         this.fetchGoo(queryWord).then(arr => {
+            console.log('[result][goo] sections ===', arr)
             const mountPoint = this.getDictElemInTooltip('goo')
             if (!mountPoint) { return }
             for (const section of arr) {
-                mountPoint.append(this.genBookRef(section))
+                mountPoint.append(this.genWordRef(section))
                 mountPoint.append(section.sectionElement)
                 mountPoint.append(document.createElement('hr'))
             }
@@ -211,28 +218,64 @@ class DictManager  {
         })
     }
     private async fetchWeblio(queryWord: string): Promise<DefinitionSection[]> {
+        // NOTE: It seems under Android, fetch() + User-Agent headers doesn't work.
+        // But on desktop Firefox, User-Agent header works.
+        // So decide to support Weblio of both mobile and desktop versions.
         const q = encodeURI(queryWord)
         const wordUrl = `https://www.weblio.jp/content/${q}`
         const res = await safeFetchHtml(wordUrl)
         if (!res.ok) { return [] }
         const html: string = res.d
         const dom = this.parseDom(wordUrl, html)
-        const nodes = dom.querySelectorAll('.kijiWrp')
-        console.log('fetched nodes', nodes)
         const sectionList: DefinitionSection[] = []
-        nodes.forEach((el) => {
-            const headerEl = selectNearestPreviousElementSibling(el, 'pbarT')
-            if (!headerEl) { return }
-            const a = headerEl.querySelector('.pbarTL a') as HTMLLinkElement
-            sectionList.push({
-                source: {
-                    wordLink: wordUrl,
-                    bookName: a.innerText,
-                    bookLink: a.href
-                },
-                sectionElement: el
+        let nodes = dom.querySelectorAll('.kijiWrp')  // desktop version
+        if (nodes.length) {
+            console.log('[weblio] (desktop) fetched nodes', nodes)
+            nodes.forEach((el) => {
+                const headerEl = selectNearestPreviousElementSibling(el, 'pbarT')
+                if (!headerEl) { return }
+                const a = headerEl.querySelector('.pbarTL a') as HTMLLinkElement
+                sectionList.push({
+                    source: {
+                        wordLink: wordUrl,
+                        bookName: a.innerText,
+                        bookLink: a.href
+                    },
+                    sectionElement: el
+                })
             })
-        })
+            return sectionList
+        }
+        nodes = dom.querySelectorAll('.division2')   // mobile version
+        if (nodes.length) {
+            console.log('[weblio] (mobile) fetched nodes', nodes)
+            nodes.forEach((el) => {
+                const headerEl = el.querySelector('.ttlArea h2') as HTMLElement | null
+                if (!headerEl) { return }
+                const bookName = headerEl.innerText.replaceAll('\n', '')
+                const bookLinkEl = el.querySelector('.ttlArea .lgDict') as HTMLLinkElement | null
+                if (!bookLinkEl) { return }
+                const bookLink = bookLinkEl.href
+                const sectionEl = el.querySelector('.subDivision')
+                if (!sectionEl) { return }
+                sectionEl.querySelectorAll('h3').forEach((oriH) => {
+                    const h2 = document.createElement('h2')
+                    h2.innerText = oriH.innerText
+                    oriH.after(h2)
+                    oriH.remove()
+                })
+                sectionList.push({
+                    source: {
+                        wordLink: wordUrl,
+                        bookName: bookName,
+                        bookLink: bookLink,
+                    },
+                    sectionElement: sectionEl
+                })
+            })
+            return sectionList
+        }
+        console.log('[weblio] not found any nodes...')
         return sectionList
     }
     private async fetchGoo(queryWord: string): Promise<DefinitionSection[]> {

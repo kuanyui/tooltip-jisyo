@@ -1,4 +1,3 @@
-
 export type dict_t = 'weblio' | 'goo'
 export type tooltip_pos_t = 'top' | 'bottom'
 export interface MyStorage {
@@ -98,8 +97,10 @@ export function safeFetchHtml(url: string, opts?: RequestInit): Promise<SafeResp
             method: "get"
         }
     }
+    // NOTE: This seems works only under Desktop Firefox.
     const headers = new Headers({
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0'
+        // 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0'
+        'User-Agent': 'Mozilla/5.0 (Android 11; Mobile; rv:83.0) Gecko/83.0 Firefox/83.0'
     })
     opts.headers = headers
     opts.signal = abortCtrl.signal
