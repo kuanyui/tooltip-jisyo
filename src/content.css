@@ -1,12 +1,11 @@
 #tooltipJisyo_tooltip {
     display: inline-block;
-    background: #ffffff;
-    color: #643045;
-    font-weight: bold;
+    background: #ffffee;
+    color: #474747;
     padding: 5px 10px;
     font-size: 13px;
     border-radius: 4px;
-    box-shadow: 0 0 2px #888888;
+    box-shadow: 0 0 4px #888888;
     z-index: 999999999;
 }
 #tooltipJisyo_tooltip .scrollArea {
@@ -16,10 +15,13 @@
     height: 400px;
     max-width: 90vw;
     max-height: 50vw;
+    scrollbar-width: none;  /* thin, none*/
 }
 
 #tooltipJisyo_tooltip .arrow,
 #tooltipJisyo_tooltip .arrow::before {
+    box-shadow: 0 0 4px #888888;
+
     position: absolute;
     width: 8px;
     height: 8px;
@@ -50,4 +52,20 @@
 
 #tooltipJisyo_tooltip[data-popper-placement^='right'] > .arrow {
     left: -4px;
+}
+
+#tooltipJisyo_tooltip h2 {
+    color: #000000;
+    border: none;
+    font-size: 20px;
+}
+#tooltipJisyo_tooltip h5 {
+    color: #000000;
+    border: none;
+    background-color: #ffddaa;
+    font-size: 14px;
+    padding: 2px;
+}
+#tooltipJisyo_tooltip a {
+    color: #0645ad;
 }
