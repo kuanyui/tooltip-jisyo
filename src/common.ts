@@ -1,4 +1,4 @@
-export type dict_t = 'weblio' | 'goo'
+export type dict_t = 'weblio_jj' | 'weblio_ejje' | 'weblio_cjjc' | 'goo_jj'
 export type tooltip_pos_t = 'top' | 'bottom'
 export interface MyStorage {
     enabledEngines: dict_t[],
@@ -32,7 +32,7 @@ class StorageManager {
     }
     getDefaultData(): MyStorage {
         return {
-            enabledEngines: ["weblio", "goo"],
+            enabledEngines: ["weblio_jj", "weblio_ejje", "weblio_cjjc", "goo_jj"],
             tooltipSize: {
                 width: '500px',
                 height: '500px',
@@ -78,6 +78,8 @@ export function sleep(ms: number): Promise<boolean> {
         window.setTimeout(() => resolve(true), ms)
     })
 }
+
+export const REGEXP_LATIN = /^[A-z\u00C0-\u00ff]+$/
 
 interface SafeResponseSuccess<T> {
     ok: true,

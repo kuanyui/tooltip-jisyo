@@ -1,4 +1,4 @@
-import { TypedMsg, storageManager, safeFetchHtml, dict_t, createDebounceFunction } from "./common"
+import { TypedMsg, storageManager, safeFetchHtml, dict_t, createDebounceFunction, REGEXP_LATIN } from "./common"
 import { arrow, createPopper, Instance, popper, VirtualElement } from '@popperjs/core'
 // import tippy from 'tippy.js';
 const BTN_ID = 'tooltipJisyo_btn'
@@ -86,6 +86,7 @@ function initSelectionEventHandler() {
     })
 }
 
+type dict_mount_element_class_t = `dict_${dict_t}`
 
 class DictManager  {
     domParser: DOMParser = new window.DOMParser()
@@ -123,14 +124,14 @@ class DictManager  {
         arrowEl.dataset['popperArrow'] = 'true'
         const scrollArea = document.createElement('div')
         scrollArea.className = 'scrollArea'
-        const gooEl = document.createElement('div')
-        gooEl.className = 'dict_goo'
-        const weblioEl = document.createElement('div')
-        weblioEl.className = 'dict_weblio'
         popperEl.append(scrollArea)
         popperEl.append(arrowEl)
-        scrollArea.append(gooEl)
-        scrollArea.append(weblioEl)
+        const allClass: dict_mount_element_class_t[] = ['dict_goo_jj', 'dict_weblio_jj', 'dict_weblio_ejje', 'dict_weblio_cjjc']
+        for (const className of allClass) {
+            const dictEl = document.createElement('div')
+            dictEl.className = className
+            scrollArea.append(dictEl)
+        }
         popperEl.addEventListener('click', (ev) => {
             ev.stopPropagation()
         })
@@ -162,15 +163,19 @@ class DictManager  {
     }
     private clearResult() {
         let el
-        el = this.getDictElemInTooltip('goo')
+        el = this.getDictElemInTooltip('goo_jj')
         if (el) { el.innerText = '' }
-        el = this.getDictElemInTooltip('weblio')
+        el = this.getDictElemInTooltip('weblio_jj')
+        if (el) { el.innerText = '' }
+        el = this.getDictElemInTooltip('weblio_cjjc')
+        if (el) { el.innerText = '' }
+        el = this.getDictElemInTooltip('weblio_ejje')
         if (el) { el.innerText = '' }
     }
     private getDictElemInTooltip(dictId: dict_t): HTMLElement | undefined {
         const rootEl = document.getElementById(TOOLTIP_ID)
         if (!rootEl) { return }
-        const className = `dict_${dictId}`
+        const className: dict_mount_element_class_t = `dict_${dictId}`
         return rootEl.getElementsByClassName(className).item(0)! as HTMLElement
     }
     private genWordRef(section: DefinitionSection): HTMLElement {
@@ -186,24 +191,17 @@ class DictManager  {
     public async openTooltipForQuery(posEl: Element | VirtualElement, queryWord: string) {
         this.clearResult()
         this.createTooltipElement(posEl)
-        this.fetchWeblio(queryWord).then(arr => {
+        if (queryWord.match(REGEXP_LATIN)) {
+            this.fetchEnglish(queryWord)
+        } else {
+            this.fetchEnglish(queryWord)
+            this.fetchJapanese(queryWord)
+        }
+    }
+    private async fetchEnglish(queryWord: string) {
+        this.fetchWeblioEJJE(queryWord).then(arr => {
             console.log('[result][weblio] sections ===', arr)
-            const mountPoint = this.getDictElemInTooltip('weblio')
-            if (!mountPoint) { return }
-            for (const section of arr) {
-                mountPoint.append(this.genWordRef(section))
-                mountPoint.append(section.sectionElement)
-                mountPoint.append(document.createElement('hr'))
-            }
-            if (this.instance) {
-                this.instance.forceUpdate()
-            } else {
-                console.warn('not found popper instance')
-            }
-        })
-        this.fetchGoo(queryWord).then(arr => {
-            console.log('[result][goo] sections ===', arr)
-            const mountPoint = this.getDictElemInTooltip('goo')
+            const mountPoint = this.getDictElemInTooltip('weblio_ejje')
             if (!mountPoint) { return }
             for (const section of arr) {
                 mountPoint.append(this.genWordRef(section))
@@ -217,7 +215,54 @@ class DictManager  {
             }
         })
     }
-    private async fetchWeblio(queryWord: string): Promise<DefinitionSection[]> {
+    private async fetchJapanese(queryWord: string) {
+        this.fetchWeblioJJ(queryWord).then(arr => {
+            console.log('[result][weblio] sections ===', arr)
+            const mountPoint = this.getDictElemInTooltip('weblio_jj')
+            if (!mountPoint) { return }
+            for (const section of arr) {
+                mountPoint.append(this.genWordRef(section))
+                mountPoint.append(section.sectionElement)
+                mountPoint.append(document.createElement('hr'))
+            }
+            if (this.instance) {
+                this.instance.forceUpdate()
+            } else {
+                console.warn('not found popper instance')
+            }
+        })
+        this.fetchWeblioCJJC(queryWord).then(arr => {
+            console.log('[result][weblio] sections ===', arr)
+            const mountPoint = this.getDictElemInTooltip('weblio_cjjc')
+            if (!mountPoint) { return }
+            for (const section of arr) {
+                mountPoint.append(this.genWordRef(section))
+                mountPoint.append(section.sectionElement)
+                mountPoint.append(document.createElement('hr'))
+            }
+            if (this.instance) {
+                this.instance.forceUpdate()
+            } else {
+                console.warn('not found popper instance')
+            }
+        })
+        this.fetchGooJJ(queryWord).then(arr => {
+            console.log('[result][goo] sections ===', arr)
+            const mountPoint = this.getDictElemInTooltip('goo_jj')
+            if (!mountPoint) { return }
+            for (const section of arr) {
+                mountPoint.append(this.genWordRef(section))
+                mountPoint.append(section.sectionElement)
+                mountPoint.append(document.createElement('hr'))
+            }
+            if (this.instance) {
+                this.instance.forceUpdate()
+            } else {
+                console.warn('not found popper instance')
+            }
+        })
+    }
+    private async fetchWeblioJJ(queryWord: string): Promise<DefinitionSection[]> {
         // NOTE: It seems under Android, fetch() + User-Agent headers doesn't work.
         // But on desktop Firefox, User-Agent header works.
         // So decide to support Weblio of both mobile and desktop versions.
@@ -228,6 +273,7 @@ class DictManager  {
         const html: string = res.d
         const dom = this.parseDom(wordUrl, html)
         const sectionList: DefinitionSection[] = []
+        dom.querySelectorAll('footNoteB').forEach(e => e.remove())
         let nodes = dom.querySelectorAll('.kijiWrp')  // desktop version
         if (nodes.length) {
             console.log('[weblio] (desktop) fetched nodes', nodes)
@@ -250,9 +296,96 @@ class DictManager  {
         if (nodes.length) {
             console.log('[weblio] (mobile) fetched nodes', nodes)
             nodes.forEach((el) => {
+                const oriHeaderEl = el.querySelector('.ttlArea h2') as HTMLElement | null
+                if (!oriHeaderEl) { return }
+                const bookName = oriHeaderEl.innerText.replaceAll('\n', '')
+                const bookLinkEl = el.querySelector('.ttlArea .lgDict') as HTMLLinkElement | null
+                if (!bookLinkEl) { return }
+                const bookLink = bookLinkEl.href
+                const sectionEl = el.querySelector('.subDivision')
+                if (!sectionEl) { return }
+                sectionEl.querySelectorAll('h3').forEach((oriH) => {
+                    const h2 = document.createElement('h2')
+                    h2.innerText = oriH.innerText
+                    oriH.after(h2)
+                    oriH.remove()
+                })
+                sectionList.push({
+                    source: {
+                        wordLink: wordUrl,
+                        bookName: bookName,
+                        bookLink: bookLink,
+                    },
+                    sectionElement: sectionEl
+                })
+            })
+            return sectionList
+        }
+        console.log('[weblio_jj] not found any nodes...')
+        return sectionList
+    }
+    private async fetchWeblioEJJE(queryWord: string): Promise<DefinitionSection[]> {
+        // NOTE: It seems under Android, fetch() + User-Agent headers doesn't work.
+        // But on desktop Firefox, User-Agent header works.
+        // So decide to implement mobile version only.
+        const q = encodeURI(queryWord)
+        const wordUrl = `https://ejje.weblio.jp/content/${q}`
+        const res = await safeFetchHtml(wordUrl)
+        if (!res.ok) { return [] }
+        const html: string = res.d
+        const dom = this.parseDom(wordUrl, html)
+        const sectionList: DefinitionSection[] = []
+        let nodes = dom.querySelectorAll('.kijiWrp')  // desktop version
+        nodes = dom.querySelectorAll('.division2')   // mobile version
+        if (nodes.length) {
+            console.log('[weblio_ejje] (mobile) fetched nodes', nodes)
+            nodes.forEach((el) => {
+                const oriHeaderEl = el.querySelector('.ttlArea h2') as HTMLElement | null
+                if (!oriHeaderEl) { return }
+                const bookName = oriHeaderEl.innerText.replaceAll('\n', '')
+                const bookLink = wordUrl
+                const sectionEl = el.querySelector('.subDivision')
+                if (!sectionEl) { return }
+                sectionEl.querySelectorAll('h3').forEach((oriH) => {
+                    const h2 = document.createElement('h2')
+                    h2.innerText = oriH.innerText
+                    oriH.after(h2)
+                    oriH.remove()
+                })
+                sectionList.push({
+                    source: {
+                        wordLink: wordUrl,
+                        bookName: bookName,
+                        bookLink: bookLink,
+                    },
+                    sectionElement: sectionEl
+                })
+            })
+            return sectionList
+        }
+        console.log('[weblio_ejje] not found any nodes...')
+        return sectionList
+    }
+    private async fetchWeblioCJJC(queryWord: string): Promise<DefinitionSection[]> {
+        // NOTE: It seems under Android, fetch() + User-Agent headers doesn't work.
+        // But on desktop Firefox, User-Agent header works.
+        // So decide to implement mobile version only.
+        const q = encodeURI(queryWord)
+        const wordUrl = `https://cjjc.weblio.jp/content/${q}`
+        const res = await safeFetchHtml(wordUrl)
+        if (!res.ok) { return [] }
+        const html: string = res.d
+        const dom = this.parseDom(wordUrl, html)
+        const sectionList: DefinitionSection[] = []
+        let nodes = dom.querySelectorAll('.kijiWrp')  // desktop version
+        nodes = dom.querySelectorAll('.division2')   // mobile version
+        if (nodes.length) {
+            console.log('[weblio] (mobile) fetched nodes', nodes)
+            nodes.forEach((el) => {
                 const headerEl = el.querySelector('.ttlArea h2') as HTMLElement | null
                 if (!headerEl) { return }
                 const bookName = headerEl.innerText.replaceAll('\n', '')
+                if (bookName === '白水社 中国語辞典') { return }
                 const bookLinkEl = el.querySelector('.ttlArea .lgDict') as HTMLLinkElement | null
                 if (!bookLinkEl) { return }
                 const bookLink = bookLinkEl.href
@@ -278,7 +411,7 @@ class DictManager  {
         console.log('[weblio] not found any nodes...')
         return sectionList
     }
-    private async fetchGoo(queryWord: string): Promise<DefinitionSection[]> {
+    private async fetchGooJJ(queryWord: string): Promise<DefinitionSection[]> {
         const q = encodeURI(queryWord)
         const wordUrl = `https://dictionary.goo.ne.jp/word/${q}`
         const res = await safeFetchHtml(wordUrl)
