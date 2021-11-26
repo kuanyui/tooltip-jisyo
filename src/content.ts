@@ -273,7 +273,12 @@ class DictManager  {
         const html: string = res.d
         const dom = this.parseDom(wordUrl, html)
         const sectionList: DefinitionSection[] = []
-        dom.querySelectorAll('footNoteB').forEach(e => e.remove())
+        dom.querySelectorAll('.Wkpja script').forEach(e => e.remove())
+        dom.querySelectorAll('.Wkpja .footNote').forEach(e => e.remove())
+        dom.querySelectorAll('.Wkpja .footNoteB').forEach(e => e.remove())
+        dom.querySelectorAll('.Wkpja table.navbox').forEach(e => e.remove())
+        dom.querySelectorAll('.Wkpja .wikiBCts').forEach(e => e.remove())
+        dom.querySelectorAll('.Wkpja br + br').forEach(x=>x.remove())
         let nodes = dom.querySelectorAll('.kijiWrp')  // desktop version
         if (nodes.length) {
             console.log('[weblio] (desktop) fetched nodes', nodes)
