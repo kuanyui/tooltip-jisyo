@@ -3,6 +3,8 @@
 NAME=Tooltip Jisyo
 BIN:="node_modules/.bin"
 XPI_DIR=../xpi
+XPI_PATH="${XPI_DIR}/${NAME}.xpi"
+ZIP_PATH="../${NAME}-upload.zip"
 
 watch: clear
 	./node_modules/.bin/webpack --mode=development --watch
@@ -12,7 +14,8 @@ build: clear
 
 xpi: clear build
 	mkdir -p ${XPI_DIR}
-	zip -r -FS '${XPI_DIR}/${NAME}.xpi' dist/ img/ manifest.json README.org
+	rm -f ${XPI_PATH}
+	zip -r -FS ${XPI_PATH} dist/ img/ manifest.json README.org
 
 xpi-server: clear xpi
 	ifconfig | grep "inet " | grep --invert-match '127.0.0.1'
@@ -22,4 +25,6 @@ clear:
 	rm -rf dist/*
 
 zip-repo: clear
-	zip -r '../${NAME}-upload.zip' . -x .git/\* node_modules/\*
+	rm -f ${ZIP_PATH}
+	zip -r ${ZIP_PATH} . -x .git/\* node_modules/\*
+
