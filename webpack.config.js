@@ -1,4 +1,4 @@
-const { VueLoaderPlugin } = require('vue-loader')
+
 const CopyPlugin = require('copy-webpack-plugin')
 
 const config = {
@@ -15,9 +15,10 @@ const config = {
         rules: [
             { test: /\.tsx?$/, use: {
                 loader: 'ts-loader',
-                options: { appendTsSuffixTo: [/\.vue$/] } }
+                // options: { appendTsSuffixTo: [/\.vue$/] }
+                }
             },
-            { test: /\.vue$/, use: 'vue-loader' },
+            // { test: /\.vue$/, use: 'vue-loader' },
             { test: /\.pug$/, loader: 'pug-plain-loader' },
             { test: /\.styl(us)?$/, use: [ 'vue-style-loader', 'css-loader', 'stylus-loader' ] },
             { test: /\.(gif|svg|jpg|png)$/, loader: "file-loader" },
@@ -28,7 +29,6 @@ const config = {
       extensions: [ '.tsx', '.ts', '.js' ]
     },
     plugins: [
-      new VueLoaderPlugin(),
       new CopyPlugin([
         // { from: 'options_ui/index.html', to: 'options_ui.html', force: true, toType: 'file' },
         { from: 'src/content.css', to: 'content.css', force: true, toType: 'file' },
