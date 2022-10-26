@@ -34,3 +34,6 @@ storageManager.onDataChanged((changes) => {
     console.log('[background] storage changed!', changes)
     STORAGE.enabledEngines = changes.enabledEngines.newValue
 })
+
+
+browser.runtime.openOptionsPage()

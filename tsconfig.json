@@ -4,7 +4,7 @@
     "src/*.ts",
     "src/**/*.ts",
     "options_ui/*.ts",
-    "options_ui/*.vue",
+    "options_ui/*.vue", "options_ui/index.js",
   ],
   "exclude": [
     "node_modules"
