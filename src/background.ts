@@ -35,5 +35,6 @@ storageManager.onDataChanged((changes) => {
     STORAGE.enabledEngines = changes.enabledEngines.newValue
 })
 
-
-browser.runtime.openOptionsPage()
+if (__COMPILE_ENV__.NODE_ENV === 'development') {
+    browser.runtime.openOptionsPage()
+}

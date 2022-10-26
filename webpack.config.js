@@ -1,6 +1,6 @@
-
+const webpack = require('webpack')
 const CopyPlugin = require('copy-webpack-plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const config = {
     entry: {
@@ -49,7 +49,14 @@ const config = {
 }
 
 module.exports = (env, argv) => {
-    console.log('mode =', argv.mode)
+    console.log('Current webpack mode is', argv.mode)
+    config.plugins.push(
+        new webpack.DefinePlugin({
+            __COMPILE_ENV__: {
+                NODE_ENV: JSON.stringify(argv.mode),
+            },
+        })
+    )
     if (argv.mode === 'development') {
         config.devtool = 'source-map';
     }
