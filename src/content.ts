@@ -483,3 +483,20 @@ function selectNearestPreviousElementSibling(el: Element, className: string): El
 }
 
 initSelectionEventHandler()
+
+function traverseShadow(el: Element, depth: number = 0): void {
+    console.log('[DEBUG] traverseShadow location.href =', location.href)
+    const shadow = (el as HTMLElement).shadowRoot
+    if (shadow) {
+        console.log('[DEBUG] ' + ' '.repeat(depth * 2) + 'Shadow root found on', el)
+        const iframes = shadow.querySelectorAll('iframe')
+        iframes.forEach(f => {
+            console.log('[DEBUG] ' + ' '.repeat(depth * 2 + 2) + 'iframe:', f)
+        })
+        const descendants = shadow.querySelectorAll('*')
+        descendants.forEach(c => traverseShadow(c, depth + 1))
+    }
+}
+
+// console.log('[DEBUG] content script loaded:', location.href)
+// setTimeout(() => traverseShadow(document.documentElement), 4000)
