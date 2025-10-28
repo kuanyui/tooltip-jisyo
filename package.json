@@ -4,9 +4,8 @@
   "description": "tooltip de jisyo wo siraberu",
   "main": "dist/index.js",
   "dependencies": {
-    "@popperjs/core": "^2.10.2",
-    "bootstrap": "^4.3.1",
-    "tippy.js": "^6.3.2"
+    "@floating-ui/dom": "^1.7.4",
+    "bootstrap": "^4.3.1"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^5.0.2",
