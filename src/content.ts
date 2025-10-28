@@ -150,7 +150,12 @@ class DictManager  {
             ev.stopPropagation()
         })
         popperEl.addEventListener('wheel', (ev) => {
-            ev.stopPropagation()
+            const isAtTop = scrollArea.scrollTop === 0
+            const isAtBottom = scrollArea.scrollTop + scrollArea.clientHeight >= scrollArea.scrollHeight
+            if ((isAtTop && ev.deltaY < 0) || (isAtBottom && ev.deltaY > 0)) {
+                ev.preventDefault() // Avoid outside scroll
+            }
+            ev.stopPropagation()   // Never let outside scroll
         })
         document.body.append(popperEl)
         this.floatUpdatePos = () => {
