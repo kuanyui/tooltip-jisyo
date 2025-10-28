@@ -160,6 +160,7 @@ class DictManager  {
                     offset(10),
                     flip(),
                     shift({
+                        boundary: document.body,
                         crossAxis: true,
                         limiter: limitShift({
                             offset: 0, // don't allow out of window
