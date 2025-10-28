@@ -36,6 +36,7 @@ function getFloatBtn(): HTMLElement {
     el.style.position = 'absolute'
     el.style.zIndex = '99999999999999999'
     el.style.padding = '8px'
+    el.style.textIndent = '0px'
     el.style.backgroundColor = '#cc4444'
     el.style.color = '#ffffff'
     el.style.borderColor = '#440000'
@@ -119,6 +120,18 @@ class DictManager  {
         const popperEl = document.createElement('div')
         popperEl.id = TOOLTIP_ID
         popperEl.setAttribute('role', 'tooltip')
+        const headerEl = document.createElement('div')
+        headerEl.className = 'header'
+        const headerTitleEl = document.createElement('div')
+        headerTitleEl.className = 'headerTitle'
+        headerTitleEl.innerText = "Tooltip Jisyo"
+        const closeBtnEl = document.createElement('button')
+        closeBtnEl.className = 'closeBtn'
+        closeBtnEl.innerText = '×'
+
+        headerEl.append(headerTitleEl)
+        headerEl.append(closeBtnEl)
+        popperEl.append(headerEl)
         const arrowEl = document.createElement('div')
         arrowEl.className = 'arrow'
         arrowEl.dataset['popperArrow'] = 'true'
@@ -135,17 +148,21 @@ class DictManager  {
         popperEl.addEventListener('click', (ev) => {
             ev.stopPropagation()
         })
+        popperEl.addEventListener('wheel', (ev) => {
+            ev.stopPropagation()
+        })
         document.body.append(popperEl)
         this.instance = createPopper(posEl, popperEl, {
             placement: 'auto',
             modifiers: [
-              {
-                name: 'offset',
-                options: {
-                  offset: [0, 8],
+                {
+                    name: 'offset',
+                    options: {
+                        offset: [0, 8],
+                    },
                 },
-              },
             ],
+
         })
         window.setTimeout(() => {
             const destroyer = () => {
@@ -159,6 +176,7 @@ class DictManager  {
                 document.body.removeEventListener('click', destroyer)
             }
             document.body.addEventListener('click', destroyer)
+            closeBtnEl.addEventListener('click', destroyer)
         }, 500)
     }
     private clearResult() {

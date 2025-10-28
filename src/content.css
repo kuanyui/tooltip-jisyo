@@ -6,9 +6,34 @@
     font-size: 13px;
     border-radius: 4px;
     box-shadow: 0 0 4px #888888;
-    z-index: 999999999;
+    z-index: 99999999999999;
+    * {
+        background: #ffffee;
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        .headerTitle {
+            display: flex;
+            align-items: center;
+            text-indent: 0;
+            font-size: 18px;
+        }
+        .closeBtn {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            border: 1px solid #ccc;
+            background: #f0f0d0;
+            cursor: pointer;
+            border-style: solid;
+            color: #474747;
+            padding: 6px 10px;
+            margin: 2px 0 6px;
+        }
+    }
 }
-#tooltipJisyo_tooltip .scrollArea {
+.scrollArea {
     display: block;
     overflow-y: scroll;
     width: 400px;

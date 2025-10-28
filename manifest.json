@@ -23,6 +23,8 @@
     },
     "content_scripts": [
         {
+            "all_frames": true,
+            "match_about_blank": true,   // For empty iframe
             "run_at": "document_start",
             "matches": [ "<all_urls>" ],
             "js": ["dist/content.js"],
