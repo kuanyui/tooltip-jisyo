@@ -221,6 +221,7 @@ class DictManager  {
             const mountPoint = this.getDictElemInTooltip('weblio_jj')
             if (!mountPoint) { return }
             for (const section of arr) {
+                if (section.source.bookName === 'ウィキペディア') { continue }   // Skip Wikipedia because it's too long
                 mountPoint.append(this.genWordRef(section))
                 mountPoint.append(section.sectionElement)
                 mountPoint.append(document.createElement('hr'))
