@@ -1,5 +1,5 @@
 import { TypedMsg, storageManager, safeFetchHtml, dict_t, createDebounceFunction, REGEXP_LATIN } from "./common"
-import { arrow, createPopper, Instance, popper, VirtualElement } from '@popperjs/core'
+import {autoPlacement, autoUpdate, computePosition, flip, limitShift, offset, shift, VirtualElement} from '@floating-ui/dom';
 // import tippy from 'tippy.js';
 const BTN_ID = 'tooltipJisyo_btn'
 const TOOLTIP_ID = 'tooltipJisyo_tooltip'
@@ -91,7 +91,8 @@ type dict_mount_element_class_t = `dict_${dict_t}`
 
 class DictManager  {
     domParser: DOMParser = new window.DOMParser()
-    instance: Instance | undefined
+    floatDeleteElemWatcher: (() => void) | undefined
+    floatUpdatePos: (() => void) | undefined
     private parseDom(docUrl: string, html: string): Document {
         const u = new URL(docUrl)
         const domain = u.origin
@@ -152,17 +153,29 @@ class DictManager  {
             ev.stopPropagation()
         })
         document.body.append(popperEl)
-        this.instance = createPopper(posEl, popperEl, {
-            placement: 'auto',
-            modifiers: [
-                {
-                    name: 'offset',
-                    options: {
-                        offset: [0, 8],
-                    },
-                },
-            ],
-
+        this.floatUpdatePos = () => {
+            computePosition(posEl, popperEl, {
+                middleware: [
+                    // autoPlacement(),
+                    offset(10),
+                    flip(),
+                    shift({
+                        crossAxis: true,
+                        limiter: limitShift({
+                            offset: 0, // don't allow out of window
+                        }),
+                    }),
+                ],
+            }).then((nv) => {
+                Object.assign(popperEl.style, {
+                    left: `${nv.x}px`,
+                    top: `${nv.y}px`,
+                })
+            })
+        }
+        this.floatDeleteElemWatcher = autoUpdate(posEl, popperEl, () => {
+            if (!this.floatUpdatePos) { throw new Error('[Bug]') }
+            this.floatUpdatePos()
         })
         window.setTimeout(() => {
             const destroyer = () => {
@@ -170,9 +183,11 @@ class DictManager  {
                 if (el) {
                     el.remove()
                 }
-                if (this.instance) {
-                    this.instance.destroy()
+                if (this.floatDeleteElemWatcher) {
+                    this.floatDeleteElemWatcher()
                 }
+                this.floatDeleteElemWatcher = undefined
+                this.floatUpdatePos = undefined
                 document.body.removeEventListener('click', destroyer)
             }
             document.body.addEventListener('click', destroyer)
@@ -226,10 +241,10 @@ class DictManager  {
                 mountPoint.append(section.sectionElement)
                 mountPoint.append(document.createElement('hr'))
             }
-            if (this.instance) {
-                this.instance.forceUpdate()
+            if (this.floatUpdatePos) {
+                this.floatUpdatePos()
             } else {
-                console.warn('not found popper instance')
+                console.warn('not found floating-ui function')
             }
         })
     }
@@ -244,10 +259,10 @@ class DictManager  {
                 mountPoint.append(section.sectionElement)
                 mountPoint.append(document.createElement('hr'))
             }
-            if (this.instance) {
-                this.instance.forceUpdate()
+            if (this.floatUpdatePos) {
+                this.floatUpdatePos()
             } else {
-                console.warn('not found popper instance')
+                console.warn('not found floating-ui function')
             }
         })
         this.fetchWeblioCJJC(queryWord).then(arr => {
@@ -259,10 +274,10 @@ class DictManager  {
                 mountPoint.append(section.sectionElement)
                 mountPoint.append(document.createElement('hr'))
             }
-            if (this.instance) {
-                this.instance.forceUpdate()
+            if (this.floatUpdatePos) {
+                this.floatUpdatePos()
             } else {
-                console.warn('not found popper instance')
+                console.warn('not found floating-ui function')
             }
         })
         this.fetchGooJJ(queryWord).then(arr => {
@@ -274,10 +289,10 @@ class DictManager  {
                 mountPoint.append(section.sectionElement)
                 mountPoint.append(document.createElement('hr'))
             }
-            if (this.instance) {
-                this.instance.forceUpdate()
+            if (this.floatUpdatePos) {
+                this.floatUpdatePos()
             } else {
-                console.warn('not found popper instance')
+                console.warn('not found floating-ui function')
             }
         })
     }
