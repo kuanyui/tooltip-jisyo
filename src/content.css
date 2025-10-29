@@ -1,4 +1,7 @@
 #tooltipJisyo_tooltip {
+    position: absolute;
+    top: 0;
+    left: 0;
     display: inline-block;
     background: #ffffee;
     color: #474747;
@@ -83,6 +86,7 @@
     color: #000000;
     border: none;
     font-size: 20px;
+    margin: 4px 0;
 }
 #tooltipJisyo_tooltip h5 {
     color: #000000;
@@ -90,7 +94,9 @@
     background-color: #ffddaa;
     font-size: 14px;
     padding: 2px;
+    margin: 4px 0;
 }
 #tooltipJisyo_tooltip a {
     color: #0645ad;
+    margin: 4px 0;
 }

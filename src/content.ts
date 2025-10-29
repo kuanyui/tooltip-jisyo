@@ -47,6 +47,31 @@ function getFloatBtn(): HTMLElement {
     return el
 }
 
+function isElementVisuallyCovered(el: Element) {
+  const rect = el.getBoundingClientRect()
+  const points = [
+    [rect.left + 1, rect.top + 1], // top-left
+    [rect.right - 1, rect.top + 1], // top-right
+    [rect.left + 1, rect.bottom - 1], // bottom-left
+    [rect.right - 1, rect.bottom - 1], // bottom-right
+  ]
+
+  return points.some(([x, y]) => {
+    const top = document.elementFromPoint(x, y)
+    return top !== el && !el.contains(top)
+  })
+}
+
+function isElementInViewport(el: Element) {
+  const rect = el.getBoundingClientRect();
+  return (
+    rect.top < window.innerHeight &&
+    rect.bottom > 0 &&
+    rect.left < window.innerWidth &&
+    rect.right > 0
+  )
+}
+
 function initSelectionEventHandler() {
     // selectionchange is often triggered before button clicked, so add a timeout
     const selectionEvtHandler = () => {
@@ -67,8 +92,14 @@ function initSelectionEventHandler() {
         console.log('text changed ==>', text)
         let range = selection.getRangeAt(selection.rangeCount - 1)
         let rect = range.getBoundingClientRect()
-        floatBtn.style.top = `calc(${window.scrollY + rect.top}px + 48px)`
+        floatBtn.style.top = `calc(${window.scrollY + rect.top}px + 58px)`
         floatBtn.style.left = `calc(${rect.left}px + calc(${rect.width}px / 2) - 40px)`
+        window.setTimeout(() => {
+            if (isElementVisuallyCovered(floatBtn) || !isElementInViewport(floatBtn)) {
+                floatBtn.style.top = `calc(${window.scrollY + rect.top}px - 100px)`
+                floatBtn.style.left = `calc(${rect.left}px + calc(${rect.width}px / 2) - 40px)`
+            }
+        }, 500)
         floatBtn.onclick = (ev) => {
             ev.stopPropagation()
             const virtualEl = {
